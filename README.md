@@ -10,7 +10,7 @@
 🔗 **線上直接使用（無需安裝）**  
 https://wici-kt.github.io/attendance-calculator/
 
-⭐ **離線版單檔下載** → [attendance.html](https://raw.githubusercontent.com/wici-kt/attendance-calculator/main/attendance.html)
+⭐ **離線版單檔下載** → [index.html](https://raw.githubusercontent.com/wici-kt/attendance-calculator/main/index.html)
 
 ---
 

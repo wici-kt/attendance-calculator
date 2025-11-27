@@ -17,7 +17,7 @@
 
 如果您已將檔案託管在 GitHub Pages，只需訪問您的專案網址即可：
 
-[https://wici-kt.github.io/attendance-calculator/]
+[https://username.github.io/repository-name/attendance.html](https://username.github.io/repository-name/attendance.html)
 2. 本地使用 (Local Usage)
 
 下載專案中的 attendance.html 檔案。

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全分鐘制出勤管理系統</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #27ae60; /* 改為綠色系,代表時間管理 */
+            --bg-color: #eef2f3;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --alert-red: #c0392b;
+            --alert-yellow: #f39c12;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            font-size: 26px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* 輸入區佈局 */
+        .input-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #e1e4e8;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+            outline: none;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        /* 按鈕 */
+        button {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #34495e;
+            transform: translateY(-2px);
+        }
+
+        /* 結果展示區 */
+        #resultsSection {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .result-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 13px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+        
+        .unit {
+            font-size: 14px;
+            font-weight: normal;
+            color: #95a5a6;
+            margin-left: 2px;
+        }
+
+        .sub-value {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        /* 警告框 */
+        .alert-box {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+            font-weight: bold;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .alert-error {
+            background-color: #fadbd8;
+            color: #922b21;
+            border-left: 5px solid var(--alert-red);
+        }
+
+        .alert-warning {
+            background-color: #fcf3cf;
+            color: #9a7d0a;
+            border-left: 5px solid var(--alert-yellow);
+        }
+
+        @media (max-width: 600px) {
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⏳ 全分鐘制出勤計算器</h1>
+    <p class="subtitle">將缺席與遲到統一轉換為分鐘進行精確計算</p>
+
+    <div id="inputErrorBox" class="alert-box alert-error"></div>
+
+    <div class="input-section">
+        <div class="input-grid">
+            <div class="form-group">
+                <label for="totalClasses">總課堂數</label>
+                <input type="number" id="totalClasses" placeholder="例: 13" min="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="classDuration">單堂時長 (分鐘)</label>
+                <input type="number" id="classDuration" placeholder="例: 60" min="1">
+            </div>
+
+            <div class="form-group">
+                <label for="maxAbsenceRate">最大允許缺席率 (%)</label>
+                <input type="number" id="maxAbsenceRate" placeholder="例: 20" min="0" max="100">
+                <span class="hint">課程規定的扣考線</span>
+            </div>
+
+            <div class="form-group">
+                <label for="classesHeld">已進行堂數 (用於驗證)</label>
+                <input type="number" id="classesHeld" placeholder="例: 5" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="actualAbsences">已缺席堂數</label>
+                <input type="number" id="actualAbsences" placeholder="例: 1" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="totalLateness">已遲到總分鐘數</label>
+                <input type="number" id="totalLateness" placeholder="例: 15" min="0" value="0">
+            </div>
+        </div>
+    </div>
+
+    <button onclick="calculateResults()">計 算 狀 態</button>
+
+    <div id="resultsSection">
+        
+        <div id="resultAlertBox" class="alert-box"></div>
+
+        <div class="section-title">核心指標 (基於全課程)</div>
+        <div class="dashboard-grid">
+            <div class="result-card">
+                <h3>預期最終出席率</h3>
+                <div class="result-value" id="resAttRate">--</div>
+                <div class="sub-value">若全勤剩餘課程</div>
+            </div>
+            <div class="result-card">
+                <h3>目前總消耗率</h3>
+                <div class="result-value" id="resAbsRate">--</div>
+                <div class="sub-value">缺席 + 遲到折算</div>
+            </div>
+        </div>
+
+        <div class="section-title">時間銀行 (Time Budget)</div>
+        <div class="dashboard-grid">
+            <div class="result-card">
+                <h3>總允許缺席時間</h3>
+                <div class="result-value" id="resMaxTime">--</div>
+            </div>
+            <div class="result-card">
+                <h3>已消耗時間</h3>
+                <div class="result-value" id="resConsumedTime">--</div>
+                <div class="sub-value" id="resConsumedDetail"></div>
+            </div>
+            <div class="result-card" style="border-color: var(--accent-color); background-color: #f0fdf4;">
+                <h3>尚餘緩衝時間</h3>
+                <div class="result-value" id="resBufferTime">--</div>
+                <div class="sub-value" id="resBufferClasses"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function calculateResults() {
+        // --- 1. 獲取輸入 ---
+        const totalClasses = parseInt(document.getElementById('totalClasses').value);
+        const classDuration = parseFloat(document.getElementById('classDuration').value);
+        const classesHeld = parseInt(document.getElementById('classesHeld').value);
+        const maxAbsenceRate = parseFloat(document.getElementById('maxAbsenceRate').value);
+        const actualAbsences = parseInt(document.getElementById('actualAbsences').value) || 0;
+        const totalLateness = parseFloat(document.getElementById('totalLateness').value) || 0;
+
+        // UI 元素
+        const inputErrorBox = document.getElementById('inputErrorBox');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultAlertBox = document.getElementById('resultAlertBox');
+
+        // 重置
+        inputErrorBox.style.display = 'none';
+        resultsSection.style.display = 'none';
+        resultAlertBox.style.display = 'none';
+        resultAlertBox.className = 'alert-box'; 
+
+        // --- 2. 驗證數據 ---
+        let errorMessage = "";
+        if (!totalClasses || !classDuration || isNaN(classesHeld) || isNaN(maxAbsenceRate)) {
+            errorMessage = "請填寫所有必要欄位。";
+        } else if (classesHeld > totalClasses) {
+            errorMessage = "錯誤:已進行堂數不能超過總堂數。";
+        } else if (actualAbsences > classesHeld) {
+            errorMessage = "錯誤:已缺席堂數不能超過已進行堂數。";
+        }
+
+        if (errorMessage) {
+            inputErrorBox.textContent = errorMessage;
+            inputErrorBox.style.display = 'block';
+            return;
+        }
+
+        // --- 3. 核心邏輯 (全分鐘制) ---
+
+        // 3.1 基礎數據
+        const totalCourseTime = totalClasses * classDuration; // 課程總分鐘數
+        
+        // 3.2 時間銀行 (總共允許錯過多少分鐘)
+        // 使用 floor 確保不因為小數點誤差導致看起來可以多缺課
+        const maxAllowedTime = Math.floor(totalCourseTime * (maxAbsenceRate / 100));
+
+        // 3.3 已消耗時間 (缺席堂數轉分鐘 + 遲到分鐘)
+        const absenceTimeConsumed = actualAbsences * classDuration;
+        const totalConsumedTime = absenceTimeConsumed + totalLateness;
+
+        // 3.4 尚餘緩衝時間 (Remaining Buffer)
+        const remainingBufferTime = maxAllowedTime - totalConsumedTime;
+
+        // 3.5 計算比率 (Rates)
+        // 缺席率 = 已消耗時間 / 總課程時間 (這樣把遲到也算進缺席率,更嚴格準確)
+        const currentAbsRate = (totalConsumedTime / totalCourseTime) * 100;
+        
+        // 出席率 = 100% - 缺席率
+        let projectedAttRate = 100 - currentAbsRate;
+        if (projectedAttRate < 0) projectedAttRate = 0;
+
+        // 輔助數據:剩餘時間等於幾堂課
+        const remainingBufferClasses = (remainingBufferTime / classDuration).toFixed(1);
+
+        // --- 4. 更新 UI ---
+        
+        document.getElementById('resAttRate').textContent = projectedAttRate.toFixed(1) + '%';
+        document.getElementById('resAbsRate').textContent = currentAbsRate.toFixed(1) + '%';
+
+        document.getElementById('resMaxTime').innerHTML = maxAllowedTime + '<span class="unit">分鐘</span>';
+        
+        document.getElementById('resConsumedTime').innerHTML = totalConsumedTime + '<span class="unit">分鐘</span>';
+        document.getElementById('resConsumedDetail').textContent = `(缺席 ${actualAbsences} 堂 + 遲到 ${totalLateness} 分)`;
+
+        document.getElementById('resBufferTime').innerHTML = remainingBufferTime + '<span class="unit">分鐘</span>';
+        document.getElementById('resBufferClasses').textContent = `約等於 ${remainingBufferClasses} 堂課`;
+
+        // 顏色邏輯:如果剩餘時間是負的,變紅色
+        const bufferElement = document.getElementById('resBufferTime').parentElement;
+        if (remainingBufferTime < 0) {
+            bufferElement.style.backgroundColor = '#fadbd8';
+            bufferElement.style.borderColor = '#e74c3c';
+            document.getElementById('resBufferTime').style.color = '#c0392b';
+        } else {
+            bufferElement.style.backgroundColor = '#f0fdf4';
+            bufferElement.style.borderColor = '#27ae60';
+            document.getElementById('resBufferTime').style.color = '#2c3e50';
+        }
+
+        resultsSection.style.display = 'block';
+
+        // --- 5. 警告系統 ---
+        let alertMsg = "";
+        let isCritical = false;
+
+        // 嚴格檢查:只要剩餘時間小於 0 就是超限
+        if (remainingBufferTime < 0) {
+            const overTime = Math.abs(remainingBufferTime);
+            alertMsg += `⚠️ <b>危險!</b> 您的缺席/遲到總時數已超過上限!<br>已超標 <b>${overTime} 分鐘</b>。這可能導致該科目不及格 (F)。<br>`;
+            isCritical = true;
+        } else if (remainingBufferTime < classDuration && remainingBufferTime > 0) {
+            alertMsg += `🔔 <b>提醒:</b> 您的緩衝時間只剩下 <b>${remainingBufferTime} 分鐘</b> (不足一堂課)。<br>請避免再有任何遲到或缺席。`;
+        } else if (remainingBufferTime === 0) {
+             alertMsg += `⚠️ <b>臨界點:</b> 您已用盡所有缺席額度 (0 分鐘剩餘)。<br>下次遲到 1 分鐘即會超標。`;
+             isCritical = true; // 設為 critical 引起注意
+        }
+
+        if (alertMsg) {
+            resultAlertBox.innerHTML = alertMsg;
+            resultAlertBox.style.display = 'block';
+            if (isCritical) {
+                resultAlertBox.classList.add('alert-error');
+                resultAlertBox.classList.remove('alert-warning');
+            } else {
+                resultAlertBox.classList.add('alert-warning');
+                resultAlertBox.classList.remove('alert-error');
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

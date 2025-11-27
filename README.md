@@ -1,80 +1,59 @@
-💻 全分鐘制課堂出勤及遲到時長計算器
-這個專案是一個簡單、高效的靜態網站應用程式，旨在幫助學生和教師即時追蹤課程出席狀況。它採用 「全分鐘制時間銀行 (Time Budget)」 邏輯，將遲到和缺席統一轉換為分鐘來計算，確保對課程規定的最大允許缺席額度有最精確的掌握。
+# 💻 全分鐘制課堂出勤 & 遲到時長計算器  
+**Attendance Calculator – 全分鐘制時間銀行系統**
 
-✨ 核心功能 (Features)
-分鐘優先 (Minute-First Logic): 將所有缺席堂數和遲到分鐘數統一納入一個「時間銀行」進行計算。
+一個**極簡、極準、極美觀**的靜態網頁小工具  
+讓你永遠不會因為「每次遲到5分鐘」而不知不覺被當掉！
 
-預期最終比率 (Projected Rates): 計算學生在該課程中預期能達到的最終最高出席率和總消耗率，以評估是否滿足及格要求（例如：必須達到 80% 出席）。
+採用真正的 **「全分鐘制時間銀行」** 邏輯：  
+缺席 1 堂 + 遲到 20 分鐘 = 全部換算成「消耗的分鐘數」統一計算，精確到 ±1 分鐘！
 
-剩餘緩衝時間 (Remaining Buffer): 清楚顯示尚餘多少分鐘的「缺席額度」，防止因零星遲到而不知不覺超過限制。
+🔗 **線上直接使用（無需安裝）**  
+https://wici-kt.github.io/attendance-calculator/
 
-即時警告 (Instant Alerts): 當剩餘緩衝時間少於一堂課，或總消耗時間超過上限時，即時發出視覺警告。
+⭐ **離線版單檔下載** → [attendance.html](https://raw.githubusercontent.com/wici-kt/attendance-calculator/main/attendance.html)
 
-跨平台使用 (Cross-Platform): 作為單頁 HTML 檔案，可以在任何現代瀏覽器中運行。
+---
 
-🛠️ 使用方法 (How to Use)
-1. 線上使用 (Online Usage - Via GitHub Pages)
+## ✨ 功能亮點
 
-如果您已將檔案託管在 GitHub Pages，只需訪問您的專案網址即可：
+| 圖標 | 功能                  | 說明                                                                                   |
+|------|-----------------------|----------------------------------------------------------------------------------------|
+| ⏰   | 分鐘級精確計算         | 遲到 1 分鐘就是 1 分鐘，絕不四捨五入                                                   |
+| 📈   | 預期最終出席率         | 立刻看到「之後全部到課」能拿到的最高出席率                                             |
+| 🛡️   | 剩餘緩衝時間           | 還能再遲到/缺席幾分鐘才會跌破及格線（例如 80%）                                        |
+| ⚠️   | 三段式即時警示         | 安全 → 警告（剩餘 < 1 堂）→ 危險（已超標）自動變色 + 醒目文字                          |
+| 📱   | 100% 離線 + PWA        | 單一 HTML 檔案，加到手機桌面後就像 App 一樣使用                                        |
+| 🎨   | 深色模式自動適配       | 跟隨系統深色/淺色模式，護眼又好看                                                      |
+| 🚀   | 零依賴、秒開           | 無任何外部資源，檔案只有 ~20 KB，打開就是秒載                                          |
 
-[https://wici-kt.github.io/attendance-calculator/]
-2. 本地使用 (Local Usage)
+---
 
-下載專案中的 attendance.html 檔案。
+## 🚀 兩種使用方式
 
-直接用任何網頁瀏覽器（如 Chrome, Edge, Safari）打開該檔案。
+### 1. 線上版（最方便）
+點擊即用 → https://wici-kt.github.io/attendance-calculator/
 
-輸入您的課程數據，點擊「計算狀態」按鈕即可獲得結果。
+### 2. 離線本地版（推薦放手機桌面）
+1. 下載單檔：[attendance.html](https://raw.githubusercontent.com/wici-kt/attendance-calculator/main/attendance.html)  
+2. 用任何瀏覽器打開  
+3. 手機長按 →「加入主畫面」，之後就像 App 一樣一鍵開啟！
 
-📊 關鍵計算邏輯 (Key Calculation Formulae)
-本系統的核心是將所有時間折算為分鐘進行比較。
+---
 
-1. 總允許缺席時間 (Maximum Allowed Time)
+## 📊 核心計算公式（完全透明）
 
-這是課程規定允許缺席的總時長。
+```text
+1. 課程總分鐘數
+   T_Course = 已上課堂數 × 每堂課分鐘數
 
-T 
-Max
-​	
- =T 
-Course
-​	
- ×R 
-MaxAbs
-​	
- 
-2. 總消耗時間 (Total Consumed Time)
+2. 允許最大缺席分鐘數（時間銀行上限）
+   T_Max = T_Course × (1 − 最低出席率要求)
 
-這是學生目前因缺席或遲到而累積消耗的總時長。
+3. 已消耗分鐘數
+   T_Consumed = (缺席堂數 × 每堂分鐘數) + 累計遲到分鐘數
 
-T 
-Consumed
-​	
- =(N 
-Abs
-​	
- ×T 
-Duration
-​	
- )+T 
-Lateness
-​	
- 
-3. 預期最終出席率 (Projected Final Attendance Rate)
+4. 預期最終出席率（之後完美出席）
+   R_Projected = (T_Course − T_Consumed) / T_Course × 100%
 
-這是假設學生不再缺課/遲到的情況下，最終成績單上能達到的最高出席百分比。
-
-R 
-Att
-​	
- =100%−( 
-T 
-Course
-​	
- 
-T 
-Consumed
-​	
- 
-​	
- ×100%)
+5. 剩餘緩衝時間
+   Buffer = T_Max − T_Consumed
